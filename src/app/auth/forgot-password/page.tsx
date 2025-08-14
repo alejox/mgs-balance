@@ -42,104 +42,127 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-            <svg
-              className="h-6 w-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      <div className=" flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-8">
+        <div className="w-full max-w-sm">
+          <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+            <div className="mx-auto w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+              <svg
+                className="w-5 h-5 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              Email enviado
+            </h2>
+            <p className="text-xs text-gray-600 mb-4">
+              Hemos enviado un enlace de recuperación a tu email. Revisa tu
+              bandeja de entrada.
+            </p>
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center text-blue-600 hover:text-blue-500 font-medium transition-colors text-sm"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+              <ArrowLeft className="mr-2 h-3 w-3" />
+              Volver al login
+            </Link>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Email enviado
-          </h2>
-          <p className="text-gray-600 mt-2">
-            Hemos enviado un enlace de recuperación a tu email. Revisa tu
-            bandeja de entrada.
-          </p>
-        </div>
-
-        <div className="text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center text-blue-600 hover:text-blue-500 font-medium transition-colors"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver al login
-          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Recuperar contraseña
-        </h2>
-        <p className="text-gray-600 mt-2">
-          Ingresa tu email y te enviaremos un enlace para restablecer tu
-          contraseña
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Email
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              {...register("email")}
-              type="email"
-              id="email"
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              placeholder="tu@email.com"
-            />
+    <div className=" flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4 py-8">
+      <div className="w-full max-w-sm">
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          {/* Header */}
+          <div className="text-center mb-6">
+            <div className="mx-auto w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mb-3">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              Recuperar contraseña
+            </h2>
+            <p className="text-xs text-gray-600">
+              Ingresa tu email y te enviaremos un enlace para restablecer tu
+              contraseña
+            </p>
           </div>
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-xs font-medium text-gray-700 mb-1"
+              >
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  {...register("email")}
+                  type="email"
+                  id="email"
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm text-black"
+                  placeholder="tu@email.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm"
+            >
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+              ) : (
+                <>
+                  Enviar enlace de recuperación
+                  <ArrowRight className="ml-2 h-3 w-3" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-4 text-center">
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center text-blue-600 hover:text-blue-500 font-medium transition-colors text-sm"
+            >
+              <ArrowLeft className="mr-2 h-3 w-3" />
+              Volver al login
+            </Link>
+          </div>
         </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-        >
-          {isLoading ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-          ) : (
-            <>
-              Enviar enlace de recuperación
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </button>
-      </form>
-
-      <div className="text-center">
-        <Link
-          href="/"
-          className="inline-flex items-center text-blue-600 hover:text-blue-500 font-medium transition-colors"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver al login
-        </Link>
       </div>
     </div>
   );

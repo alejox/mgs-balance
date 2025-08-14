@@ -60,26 +60,28 @@ export async function middleware(req: NextRequest) {
       data: { session },
     } = await supabase.auth.getSession();
 
-    // Si el usuario no está autenticado y trata de acceder al dashboard
-    if (!session && req.nextUrl.pathname.startsWith("/dashboard")) {
-      const redirectUrl = req.nextUrl.clone();
-      redirectUrl.pathname = "/auth/login";
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // Si el usuario está autenticado y trata de acceder a las páginas de auth
-    if (session && req.nextUrl.pathname.startsWith("/auth")) {
+    // Solo redirigir usuarios autenticados desde páginas de auth
+    if (
+      session &&
+      req.nextUrl.pathname.startsWith("/auth") &&
+      !req.nextUrl.pathname.includes("/callback")
+    ) {
       const redirectUrl = req.nextUrl.clone();
       redirectUrl.pathname = "/dashboard";
       return NextResponse.redirect(redirectUrl);
     }
+
+    // Para el dashboard, permitir que el componente maneje la autenticación
+    if (req.nextUrl.pathname.startsWith("/dashboard")) {
+      return response;
+    }
   } catch (error) {
-    console.error("Middleware error:", error);
+    // Silently handle middleware errors
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/:path*"],
+  matcher: ["/auth/:path*", "/dashboard/:path*"],
 };

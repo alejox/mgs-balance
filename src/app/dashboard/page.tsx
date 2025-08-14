@@ -25,20 +25,12 @@ export default function DashboardPage() {
   >("idle");
   const [lastUpdateTime, setLastUpdateTime] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [consolidatedIds, setConsolidatedIds] = useState<Set<string>>(
-    new Set()
-  );
 
   // Cargar transacciones y precio del USDT al montar el componente
   useEffect(() => {
     if (user && !loading) {
       loadTransactions();
-      // Pequeño delay para asegurar que el componente esté completamente montado
-      const timer = setTimeout(() => {
-        fetchUsdtRate();
-      }, 100);
-
-      return () => clearTimeout(timer);
+      fetchUsdtRate();
     }
   }, [user, loading]);
 
@@ -50,7 +42,6 @@ export default function DashboardPage() {
       const data = await transactionService.getTransactions(user.id);
       setTransactions(data);
     } catch (error) {
-      console.error("Error loading transactions:", error);
       alert("Error al cargar las transacciones");
     }
   };
@@ -67,13 +58,13 @@ export default function DashboardPage() {
   }, [usdtRate]);
 
   const addTransaction = async () => {
-    if (!user) {
-      alert("Debes iniciar sesión para agregar transacciones");
+    if (!newTransaction.amountBs || !newTransaction.amountUsdt) {
+      alert("Por favor completa los montos en bolívares y USDT");
       return;
     }
 
-    if (!newTransaction.amountBs || !newTransaction.amountUsdt) {
-      alert("Por favor completa los montos en bolívares y USDT");
+    if (!user) {
+      alert("Debes iniciar sesión para agregar transacciones");
       return;
     }
 
@@ -104,7 +95,6 @@ export default function DashboardPage() {
         type: "income",
       });
     } catch (error) {
-      console.error("Error adding transaction:", error);
       alert("Error al agregar la transacción");
     }
   };
@@ -114,7 +104,6 @@ export default function DashboardPage() {
       await transactionService.deleteTransaction(id);
       setTransactions(transactions.filter((t) => t.id !== id));
     } catch (error) {
-      console.error("Error deleting transaction:", error);
       alert("Error al eliminar la transacción");
     }
   };
@@ -142,7 +131,6 @@ export default function DashboardPage() {
         transactions.map((t) => (t.id === id ? updatedTransaction : t))
       );
     } catch (error) {
-      console.error("Error updating transaction:", error);
       alert("Error al actualizar la transacción");
     }
   };
@@ -159,8 +147,6 @@ export default function DashboardPage() {
   const fetchUsdtRate = async () => {
     setIsLoadingRate(true);
     try {
-      console.log("🔄 Iniciando conexión a través de API route...");
-
       const response = await fetch("/api/binance", {
         method: "GET",
         headers: {
@@ -169,22 +155,11 @@ export default function DashboardPage() {
         signal: AbortSignal.timeout(10000), // 10 segundos timeout
       });
 
-      console.log(
-        "📡 Respuesta de API route:",
-        response.status,
-        response.statusText
-      );
-
       if (response.ok) {
         const data = await response.json();
-        console.log("📊 Datos de API route:", data);
 
         if (data.success && data.data) {
           const { usdtVesPrice, source, timestamp } = data.data;
-
-          console.log("✅ Precio VES/USDT obtenido:", usdtVesPrice);
-          console.log("📊 Fuente:", source);
-          console.log("🕒 Timestamp:", timestamp);
 
           setUsdtRate(usdtVesPrice);
           setConnectionStatus("connected");
@@ -197,7 +172,6 @@ export default function DashboardPage() {
         throw new Error(errorData.error || `Error HTTP: ${response.status}`);
       }
     } catch (error) {
-      console.error("❌ Error obteniendo precio desde API route:", error);
       setConnectionStatus("error");
       setLastUpdateTime(new Date().toLocaleString("es-VE"));
       // Fallback: usar valor por defecto
@@ -266,10 +240,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Debug: Mostrar información del usuario
-  console.log("Dashboard - User:", user);
-  console.log("Dashboard - Loading:", loading);
-
   // Redirigir si no hay usuario autenticado
   if (!user) {
     return (
@@ -313,7 +283,7 @@ export default function DashboardPage() {
                 await supabase.auth.signOut();
                 window.location.href = "/auth/login";
               } catch (error) {
-                console.error("Error signing out:", error);
+                // Silently handle sign out errors
               }
             }}
             className="text-sm text-red-600 hover:text-red-800"
@@ -672,14 +642,10 @@ export default function DashboardPage() {
                   amountUsdt: "",
                   type: "income",
                 });
-                setConsolidatedIds(new Set());
                 setEditingId(null);
                 setUsdtRate("0");
 
-                // Pequeño delay para asegurar que el reset se complete antes de redirigir
-                setTimeout(() => {
-                  window.location.href = "/dashboard/balances";
-                }, 100);
+                window.location.href = "/dashboard/balances";
               } else {
                 alert("No hay transacciones para consolidar");
               }
@@ -719,12 +685,7 @@ export default function DashboardPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {transactions.map((transaction, index) => (
-                <tr
-                  key={transaction.id}
-                  className={`hover:bg-gray-50 ${
-                    consolidatedIds.has(transaction.id) ? "bg-green-50" : ""
-                  }`}
-                >
+                <tr key={transaction.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                     #{index + 1}
                   </td>
@@ -844,34 +805,16 @@ export default function DashboardPage() {
                       ) : (
                         <button
                           onClick={() => startEditing(transaction.id)}
-                          disabled={consolidatedIds.has(transaction.id)}
-                          className={`${
-                            consolidatedIds.has(transaction.id)
-                              ? "text-gray-400 cursor-not-allowed"
-                              : "text-blue-600 hover:text-blue-900"
-                          }`}
-                          title={
-                            consolidatedIds.has(transaction.id)
-                              ? "No se puede editar - Transacción consolidada"
-                              : "Editar"
-                          }
+                          className="text-blue-600 hover:text-blue-900"
+                          title="Editar"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                       )}
                       <button
                         onClick={() => deleteTransaction(transaction.id)}
-                        disabled={consolidatedIds.has(transaction.id)}
-                        className={`${
-                          consolidatedIds.has(transaction.id)
-                            ? "text-gray-400 cursor-not-allowed"
-                            : "text-red-600 hover:text-red-900"
-                        }`}
-                        title={
-                          consolidatedIds.has(transaction.id)
-                            ? "No se puede eliminar - Transacción consolidada"
-                            : "Eliminar"
-                        }
+                        className="text-red-600 hover:text-red-900"
+                        title="Eliminar"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
